@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Cost Forecasting</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="chart-container">
+    <canvas id="fuelChart"></canvas>
+</div>
+
+<div id="controls">
+    <button onclick="scrollBackward()">Previous Month</button>
+    <button onclick="scrollForward()">Next Month</button>
+    <select id="fuelTypeFilter" onchange="updateChart()">
+        <option value="all">All Fuel Types</option>
+        <option value="D7DW">Solid Fuels</option>
+        <option value="D7DU">Gas</option>
+        <option value="D7DT">Electricity</option>
+        <option value="D7DV">Liquid Fuels</option>
+    </select>
+    <label>
+        <input type="radio" name="mode" value="historical" checked onchange="updateChart()"> Historical Mode
+    </label>
+    <label>
+        <input type="radio" name="mode" value="forecast" onchange="updateChart()"> Forecast Mode
+    </label>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
