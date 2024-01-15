@@ -71,7 +71,9 @@
         <!-- Add more page links as needed -->
     </nav>
 </header>
-
+<div id="splash-screen">
+    <img src="img/splashscreen.jpg" alt="Splash Screen Image">
+</div>
 <div class="content-container">
     <div class="content">
         <h2>About Me</h2>
@@ -87,6 +89,17 @@
 <footer>
     <p>All Rights reserved | t039105m@student.staffs.ac.uk</p>
 </footer>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Simulate a delay for the splash screen (e.g., 3 seconds)
+        setTimeout(function () {
+            // Hide the splash screen
+            document.getElementById("splash-screen").style.display = "none";
+            
+            // Show the main content
+            document.getElementById("content-container").style.display = "block";
+        }, 3000); // Adjust the duration as needed
+    });
+    </script>
 </body>
 </html>
