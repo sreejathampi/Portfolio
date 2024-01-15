@@ -251,36 +251,38 @@ button {
     }
     
     getForecastData() {
-        const lastKnownMonths = this.getAllData();
-        const forecastedData = [];
-        const lastMonthIndex = lastKnownMonths[lastKnownMonths.length - 1].MonthIndex;
-    
-        for (let i = 0; i <= 12; i++) {
-            const forecastedEntry = {
-                Year: lastKnownMonths[lastKnownMonths.length - 1].Year + Math.floor((lastMonthIndex + i) / 12 - 27),
-                Month: this.getMonthName((lastMonthIndex + i) % 12),
-            };
-    
-            for (const property of ['D7DW', 'D7DU', 'D7DT', 'D7DV']) {
-                const values = lastKnownMonths.map(entry => entry[property]);
-                const max = Math.max(...values);
-                const min = Math.min(...values);
-                const difference = max - min;
-                // Calculate the percentage difference
-                const percentageDifference = (difference / max) * 100;
-    
-                // Increase the value for forecasting
-                const currentValue = lastKnownMonths[lastKnownMonths.length - 1][property];
-                const forecastedValue = currentValue + (i * (percentageDifference / 100));
-    
-                forecastedEntry[property] = forecastedValue;
-            }
-    
-            forecastedData.push(forecastedEntry);
+    const lastKnownMonths = this.getAllData();
+    const forecastedData = [];
+    const lastMonthIndex = lastKnownMonths[lastKnownMonths.length - 1].MonthIndex;
+
+    // Iterate up to 11 to represent the next 11 months
+    for (let i = 0; i < 12; i++) {
+        const forecastedEntry = {
+            Year: lastKnownMonths[lastKnownMonths.length - 1].Year + Math.floor((lastMonthIndex + i) / 12 - 27),
+            Month: this.getMonthName((lastMonthIndex + i) % 12),
+        };
+
+        for (const property of ['D7DW', 'D7DU', 'D7DT', 'D7DV']) {
+            const values = lastKnownMonths.map(entry => entry[property]);
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const difference = max - min;
+            // Calculate the percentage difference
+            const percentageDifference = (difference / max) * 100;
+
+            // Increase the value for forecasting
+            const currentValue = lastKnownMonths[lastKnownMonths.length - 1][property];
+            const forecastedValue = currentValue + (i * (percentageDifference / 100));
+
+            forecastedEntry[property] = forecastedValue;
         }
-    
-        return forecastedData;
+
+        forecastedData.push(forecastedEntry);
     }
+
+    return forecastedData;
+}
+
     
     
     createDatasets(last12Months, labels) {
