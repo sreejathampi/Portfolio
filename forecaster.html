@@ -340,7 +340,7 @@ button {
     
     document.addEventListener('DOMContentLoaded', function () {
     // Fetch data from CSV and convert it to the required format
-    fetch('dataset.csv')
+    fetch('data.csv')
         .then(response => response.text())
         .then(csvData => {
             const data = convertCSVtoData(csvData);
