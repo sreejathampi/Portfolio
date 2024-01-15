@@ -3,34 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Cost Forecasting</title>
     <link rel="stylesheet" href="css/styles.css">
+    <title>Portfolio</title>
+    <style>
+        body {
+             
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+       
+        .content-container {
+            display: flex;
+            max-width: 950px;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+       
+        .gallery-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            justify-content: space-around;
+            font-family: Poppins-Medium;
+        }
+
+        .gallery-item {
+            width: 48%;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .image {
+            max-width: 50%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        
+.converter {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    margin-bottom: 5px;
+    display: block;
+}
+
+input, select {
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#result {
+    margin-top: 20px;
+    font-weight: bold;
+}
+.error {
+    color: #ff0000;
+    margin-top: 10px;
+}    
+
+      
+    </style>
 </head>
 <body>
 
-<div id="chart-container">
-    <canvas id="fuelChart"></canvas>
-</div>
+<header>
+    <div class="logo">
+        <img src="img/logo.jpg" alt="Logo">
+        <h1>Sreejamol Thampi</h1>
+    </div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="academichistory.html">Academic History</a>
+        <a href="professionalhistory.html">Professional History</a>
+        <a href="testimonials.html" >Testimonials</a>
+        <a href="skills.html" class="active">Skills</a>
+        <a href="contact.html">Contact </a>
+        
 
-<div id="controls">
-    <button onclick="scrollBackward()">Previous Month</button>
-    <button onclick="scrollForward()">Next Month</button>
-    <select id="fuelTypeFilter" onchange="updateChart()">
-        <option value="all">All Fuel Types</option>
-        <option value="D7DW">Solid Fuels</option>
-        <option value="D7DU">Gas</option>
-        <option value="D7DT">Electricity</option>
-        <option value="D7DV">Liquid Fuels</option>
-    </select>
-    <label>
-        <input type="radio" name="mode" value="historical" checked onchange="updateChart()"> Historical Mode
-    </label>
-    <label>
-        <input type="radio" name="mode" value="forecast" onchange="updateChart()"> Forecast Mode
-    </label>
-</div>
+        <!-- Add more page links as needed -->
+    </nav>
+</header>
+<body>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+    <div id="chart-container" class="container my-5">
+        <div class="container">
+            <div class="mode-switch-wrapper ta-c">
+                <label for="mode-switch">Select Mode:</label>
+                <select id="mode-switch">
+                    <option value="off">Historical Mode</option>
+                    <option value="on">Forecast Mode</option>
+                </select> 
+               
+            </div>
+            <canvas id="fuelChart"></canvas>
+            <div class="controls active" id="control">
+                <button id="prevButton" class="sm">Previous 12 Months</button>
+                <button id="nextButton" class="sm">Next 12 Months</button>
+            </div>
+        </div>
+        <div id="error-message"></div> 
+    </div>  
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    
+    
+    
+    <script>
+    class FuelCostForecast {
+    constructor(data) {
+        this.originalData = data;
+        this.data = this.processData(data);
+        this.chart = null;
+        this.increment = -1;
+        this.forecastMode = false;
+    
+        this.initializeChart();
+        this.renderChart();
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        const nextView = document.getElementById('nextButton');
+        const prevView = document.getElementById('prevButton');
+        const modeSwitch = document.getElementById('mode-switch');
+        const control = document.getElementById('control');
+    
+        nextView.addEventListener('click', () => {
+            const allData = this.forecastMode ? this.getForecastData() : this.getAllData();
+            const lastMonthIndex = allData.length - 1;
+    
+            if (this.increment >= -1) {
+                this.displayErrorMessage("Can't go further into the future.");
+            } else {
+                this.increment = this.increment + 12;
+                this.renderChart();
+                this.clearErrorMessage();
+            }
+        });
+    
+        prevView.addEventListener('click', () => {
+            this.increment = this.increment - 12;
+            const allData = this.forecastMode ? this.getForecastData() : this.getAllData();
+            const firstMonthIndex = allData.length - 12;
+    
+            if (this.increment <= -firstMonthIndex) {
+                this.increment = -firstMonthIndex; // Set to the maximum allowed value
+                this.displayErrorMessage("Can't go further into the past.");
+            } else {
+                this.renderChart();
+                this.clearErrorMessage();
+            }
+        });
+    
+        modeSwitch.addEventListener('change', () => {
+            this.forecastMode = modeSwitch.value === 'on';
+            this.renderChart();
+            control.classList.toggle('active');
+    
+        });
+    }
+    
+    displayErrorMessage(message) {
+        const errorMessageElement = document.getElementById('error-message');
+        errorMessageElement.textContent = message;
+    }
+    
+    clearErrorMessage() {
+        const errorMessageElement = document.getElementById('error-message');
+        errorMessageElement.textContent = '';
+    }
+    
+    processData(data) {
+        // Group data by year
+        const groupedData = {};
+        data.forEach(entry => {
+            const year = entry.Year;
+            if (!groupedData[year]) {
+                groupedData[year] = [];
+            }
+            groupedData[year].push(entry);
+        });
+    
+        return groupedData;
+    }
+    
+    initializeChart() {
+        const ctx = document.getElementById('fuelChart').getContext('2d');
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: this.getChartData(),
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                    },
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    }
+    
+    getChartData() {
+        const allData = this.forecastMode ? this.getForecastData() : this.getAllData();
+        const startIdx = Math.max(0, allData.length + this.increment - 12);
+        const endIdx = Math.min(allData.length + this.increment, allData.length);
+        const last12Months = allData.slice(startIdx, endIdx);
+    
+        const labels = last12Months.map(entry => `${entry.Month} ${entry.Year}`);
+        const datasets = this.createDatasets(last12Months, labels);
+    
+        return { labels, datasets };
+    }
+    
+    getAllData() {
+        return Object.values(this.data).flat();
+    }
+    
+    getForecastData() {
+        const lastKnownMonths = this.getAllData();
+        const forecastedData = [];
+        const lastMonthIndex = lastKnownMonths[lastKnownMonths.length - 1].MonthIndex;
+    
+        for (let i = 0; i <= 12; i++) {
+            const forecastedEntry = {
+                Year: lastKnownMonths[lastKnownMonths.length - 1].Year + Math.floor((lastMonthIndex + i) / 12 - 27),
+                Month: this.getMonthName((lastMonthIndex + i) % 12),
+            };
+    
+            for (const property of ['D7DW', 'D7DU', 'D7DT', 'D7DV']) {
+                const values = lastKnownMonths.map(entry => entry[property]);
+                const max = Math.max(...values);
+                const min = Math.min(...values);
+                const difference = max - min;
+                // Calculate the percentage difference
+                const percentageDifference = (difference / max) * 100;
+    
+                // Increase the value for forecasting
+                const currentValue = lastKnownMonths[lastKnownMonths.length - 1][property];
+                const forecastedValue = currentValue + (i * (percentageDifference / 100));
+    
+                forecastedEntry[property] = forecastedValue;
+            }
+    
+            forecastedData.push(forecastedEntry);
+        }
+    
+        return forecastedData;
+    }
+    
+    
+    createDatasets(last12Months, labels) {
+        const datasets = [
+            {
+                label: 'Solid Fuels (D7DW)',
+                data: last12Months.map(entry => entry.D7DW),
+                borderColor: 'rgba(255, 0, 0, 1)', // Red
+                fill: false,
+            },
+            {
+                label: 'Gas (D7DU)',
+                data: last12Months.map(entry => entry.D7DU),
+                borderColor: 'rgba(0, 255, 0, 1)', // Green
+                fill: false,
+            },
+            {
+                label: 'Electricity (D7DT)',
+                data: last12Months.map(entry => entry.D7DT),
+                borderColor: 'rgba(0, 0, 255, 1)', // Blue
+                fill: false,
+            },
+            {
+                label: 'Liquid Fuels (D7DV)',
+                data: last12Months.map(entry => entry.D7DV),
+                borderColor: 'rgba(255, 255, 0, 1)', // Yellow
+                fill: false,
+            },
+        ];
+    
+        if (this.forecastMode) {
+            const forecastedData = this.getForecastData();
+            datasets.forEach((dataset, index) => {
+                dataset.data = dataset.data.concat(forecastedData.map(entry => entry[`D7D${index + 1}`]));
+            });
+        }
+    
+        return datasets;
+    }
+    
+    getMonthName(index) {
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[index];
+    }
+    
+    renderChart() {
+        this.chart.data = this.getChartData();
+        this.chart.update();
+    }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+    // Fetch data from CSV and convert it to the required format
+    fetch('data.csv')
+        .then(response => response.text())
+        .then(csvData => {
+            const data = convertCSVtoData(csvData);
+            const fuelCostForecast = new FuelCostForecast(data);
+        });
+    
+    function convertCSVtoData(csvData) {
+        const lines = csvData.split('\n');
+        const headers = lines[0].split(',');
+        const data = [];
+    
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            const entry = {
+                Year: parseInt(values[0]),
+                Month: values[1],
+                D7DW: parseFloat(values[2]),
+                D7DU: parseFloat(values[3]),
+                D7DT: parseFloat(values[4]),
+                D7DV: parseFloat(values[5]),
+                MonthIndex: i - 1, // Add a MonthIndex property to help with forecasting
+            };
+            data.push(entry);
+        }
+        return data;
+    }
+    });
+    </script>
+
+
+<footer>
+    <p>All Rights reserved | t039105m@student.staffs.ac.uk</p>
+    <p></p>
+</footer>
+
 </body>
 </html>
