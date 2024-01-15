@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="fonts/font.css">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="manifest.json">
     <title>About Us</title>
     <style>
         body {
@@ -60,13 +60,27 @@
             padding: 20px;
         }
       
-        .image {
-            max-width: 30%;
-            max-height: 20%;
-            height: auto;
-            object-fit: cover;
-        }
-       
+      /* Hide image on screens wider than 600px (desktop) */
+    @media screen and (min-width: 601px) {
+      .mobile-image {
+        display: none;
+      }
+
+      .desktop-image {
+        display: block;
+      }
+    }
+
+    /* Hide image on screens narrower than 600px (mobile) */
+    @media screen and (max-width: 600px) {
+      .mobile-image {
+        display: block;
+      }
+
+      .desktop-image {
+        display: none;
+      }
+    }
 
         ol {
             list-style-type: upper-roman;
@@ -149,12 +163,17 @@
             </li>
         </ol>
       
-    
-  <img class="image" src="img/hat.JPG" alt="Image Description">   
+       
+    <img class="desktop-image" src="img/hat.jpg" alt="Image Description">  
+    <img class="mobile-image" width="250px" src="img/mobileview.avif" alt="mobile Responsive image">
     <!-- <picture>
-        <source media="(min-width: 768px)" srcset="img/hat.JPG">
-        <img src="img/hat.jpg" alt="Mobile Image">
-      </picture> -->
+      
+        <img src="img/mobileview.avif" alt="Mobile Image">
+      </picture>   -->
+
+    
+
+
     
 </div>
 </div>
